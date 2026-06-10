@@ -1,0 +1,43 @@
+import { defineConfig } from 'oxfmt'
+
+export default defineConfig({
+  arrowParens: 'always',
+  bracketSameLine: false,
+  bracketSpacing: true,
+  endOfLine: 'lf',
+  htmlWhitespaceSensitivity: 'css',
+  ignorePatterns: [
+    'dist/**',
+    'build/**',
+    'coverage/**',
+    'node_modules/**',
+    '.vite/**',
+    '.output/**',
+    '.nuxt/**',
+    '**/*.min.*',
+    '**/*.generated.*',
+    '**/generated/**',
+  ],
+  insertFinalNewline: true,
+  jsxSingleQuote: true,
+  objectWrap: 'preserve',
+  printWidth: 100,
+  proseWrap: 'preserve',
+  quoteProps: 'as-needed',
+  semi: false,
+  singleAttributePerLine: true,
+  singleQuote: true,
+  sortPackageJson: {
+    sortScripts: true,
+  },
+  sortTailwindcss: {
+    attributes: [':class'],
+    functions: ['clsx', 'cn', 'cva'],
+    preserveDuplicates: false,
+    preserveWhitespace: false,
+  },
+  tabWidth: 2,
+  trailingComma: 'all',
+  useTabs: false,
+  vueIndentScriptAndStyle: false,
+})
