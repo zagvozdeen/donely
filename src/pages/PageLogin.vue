@@ -1,82 +1,74 @@
 <template>
-  <div class="flex min-h-dvh w-full items-center justify-center">
-    <Form
-      v-slot="$form"
-      :resolver="resolver"
-      @submit="onSubmit"
-      :initial-values="form"
-      class="bg-surface-900 border-surface my-8 flex w-full flex-col gap-4 rounded-2xl border p-4"
-    >
-      <h1 class="w-full text-center text-xl">Войти в аккаунт</h1>
+  <div class="flex min-h-dvh items-center">
+    <Card class="w-full">
+      <CardHeader>
+        <CardTitle>Вход в аккаунт</CardTitle>
+        <CardDescription>Заполните почту и пароль, чтобы войти в аккаунт</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form @submit="onSubmit" class="space-y-4">
+          <FormField v-slot="{ componentField }" name="email">
+            <FormItem>
+              <FormLabel>Введите электронную почту</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="example@example.com" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-      <FormField name="email" v-slot="$field" class="flex flex-col gap-1">
-        <label for="email-field">Электронная почта</label>
-        <InputText
-          id="email-field"
-          v-model="form.email"
-          placeholder="Введите электронную почту"
-          fluid
-        />
-        <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{
-          $field.error?.message
-        }}</Message>
-      </FormField>
+          <FormField v-slot="{ componentField }" name="password">
+            <FormItem>
+              <FormLabel>Введите пароль</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Пароль" v-bind="componentField" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-      <FormField name="password" v-slot="$field" class="flex flex-col gap-1">
-        <label for="password-field">Пароль</label>
-        <Password
-          id="password-field"
-          v-model="form.password"
-          placeholder="Введите пароль"
-          :feedback="false"
-          toggle-mask
-          fluid
-        />
-        <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{
-          $field.error?.message
-        }}</Message>
-      </FormField>
+          <Button class="w-full" type="submit">Войти</Button>
 
-      <Button type="submit" label="Войти" fluid />
-
-      <span class="text-center"
-        >Ещё нет аккаунта?
-        <router-link :to="{ name: 'register' }" class="underline">
-          Зарегистрироваться
-        </router-link></span
-      >
-    </Form>
+          <p class="text-muted-foreground text-center text-sm">
+            Ещё нет аккаунта?
+            <router-link to="/register" class="text-foreground underline-offset-2 hover:underline">
+              Зарегистрироваться
+            </router-link>
+          </p>
+        </form>
+      </CardContent>
+    </Card>
   </div>
 </template>
+
 <script lang="ts" setup>
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Button from 'primevue/button'
-import Message from 'primevue/message'
-import { Form, FormField } from '@primevue/forms'
-import { z } from 'zod'
-import { zodResolver } from '@primevue/forms/resolvers/zod'
-import { reactive } from 'vue'
-import {useToast} from "primevue";
+import { Button } from '@/components/ui/button'
+import { FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-const toast = useToast()
-
-const form = reactive({
-  email: '',
-  password: '',
-})
-
-const resolver = zodResolver(
+const formSchema = toTypedSchema(
   z.object({
-    email: z.email('Введите электронный адрес'),
-    password: z.string().min(1, 'Введите пароль'),
+    email: z
+      .string({ message: 'Введите вашу почту' })
+      .email({ message: 'Некорректная почта' })
+      .min(1, { message: 'Введите вашу почту' })
+      .max(100),
+    password: z
+      .string({ message: 'Введите пароль' })
+      .min(8, { message: 'Минимальная длина пароля ― 8 символов' })
+      .max(100),
   }),
 )
 
-const onSubmit = ({ valid, values }) => {
-  if (valid) {
+const form = useForm({
+  validationSchema: formSchema,
+})
 
-    toast.add({severity: "info", summary: 'fsdfsd'})
-  }
-}
+const onSubmit = form.handleSubmit((values, ctx) => {
+  console.log(values, ctx)
+})
 </script>
