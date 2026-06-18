@@ -140,5 +140,12 @@ const form = useForm({
 
 const onSubmit = form.handleSubmit((values, ctx) => {
   console.log(values, ctx)
+  fetch('/api/auth/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(values),
+  })
 })
 </script>

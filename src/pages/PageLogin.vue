@@ -27,7 +27,10 @@
             </FormItem>
           </FormField>
 
-          <Button class="w-full" type="submit">Войти</Button>
+          <Button class="w-full" type="submit" :disabled="isLoading">
+            <Spinner v-show="isLoading" />
+            Войти
+          </Button>
 
           <p class="text-muted-foreground text-center text-sm">
             Ещё нет аккаунта?
@@ -45,11 +48,16 @@
 import { Button } from '@/components/ui/button'
 import { FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import { ref } from 'vue'
 
+const isLoading = ref(false)
 const formSchema = toTypedSchema(
   z.object({
     email: z
@@ -64,11 +72,29 @@ const formSchema = toTypedSchema(
   }),
 )
 
+const router = useRouter()
 const form = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = form.handleSubmit((values, ctx) => {
-  console.log(values, ctx)
+const onSubmit = form.handleSubmit((values) => {
+  isLoading.value = true
+
+  fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(values),
+  })
+    .then((res) => res.json() as Promise<{ token: string }>)
+    .then((data) => {
+      localStorage.setItem('token', data.token)
+      router.push('/')
+      toast.success('Вы успешно вошли в аккаунт')
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
 })
 </script>

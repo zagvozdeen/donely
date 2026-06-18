@@ -18,7 +18,7 @@ func (a *Application) getMux() http.Handler {
 	guest.POST("/register", a.register)
 
 	auth := api.Group("/", a.authBearer)
-	auth.GET("/me", func(c *echo.Context) error {
+	auth.GET("me", func(c *echo.Context) error {
 		u := c.Get("user")
 		return c.JSON(http.StatusOK, u)
 	})
