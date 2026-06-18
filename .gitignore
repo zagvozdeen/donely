@@ -17,3 +17,6 @@ coverage
 # Editor directories and files
 .vscode
 .idea
+
+.env
+.data
