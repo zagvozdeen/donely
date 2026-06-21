@@ -17,12 +17,13 @@ var fs embed.FS
 
 func New(ctx context.Context, cfg *config.Config, log *logger.Logger) (*pgxpool.Pool, error) {
 	connCfg, err := pgxpool.ParseConfig(fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.DBUsername,
 		cfg.DBPassword,
 		cfg.DBHost,
 		cfg.DBPort,
 		cfg.DBDatabase,
+		cfg.DBSSLMode,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("parse postgres config: %w", err)

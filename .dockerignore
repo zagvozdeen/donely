@@ -1,0 +1,13 @@
+.git
+.data
+.idea
+.vscode
+node_modules
+dist
+dist-ssr
+coverage
+logs
+*.log
+.env
+.env.*
+!.env.example

@@ -30,8 +30,9 @@ func NewApplication(cfg *config.Config, log *logger.Logger, store *store.Store) 
 }
 
 func (a *Application) Run(ctx context.Context) error {
+	addr := ":" + a.cfg.AppPort
 	server := &http.Server{
-		Addr:        ":8000",
+		Addr:        addr,
 		Handler:     a.getMux(),
 		ErrorLog:    a.log.GetLog(),
 		ReadTimeout: 30 * time.Second,
@@ -50,7 +51,7 @@ func (a *Application) Run(ctx context.Context) error {
 		case err := <-errCh:
 			a.log.Error("Failed to listen and serve server", err)
 		case <-time.After(time.Millisecond * 500):
-			a.log.Info("Server started on port 8000")
+			a.log.Infof("Server started on %s", addr)
 		case <-ctx.Done():
 			a.log.Info("Context has been canceled before server started")
 		}
