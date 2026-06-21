@@ -1,3 +1,7 @@
+export interface ErrorResponse {
+  message: string
+}
+
 export interface User {
   id: number
   uuid: string

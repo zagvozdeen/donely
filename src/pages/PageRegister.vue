@@ -78,7 +78,10 @@
             </FormItem>
           </FormField>
 
-          <Button class="w-full" type="submit">Зарегистрироваться</Button>
+          <Button class="w-full" type="submit" :disabled="form.isSubmitting.value">
+            <Spinner v-show="form.isSubmitting.value" />
+            Зарегистрироваться
+          </Button>
 
           <p class="text-muted-foreground text-center text-sm">
             Уже есть аккаунт?
@@ -94,13 +97,17 @@
 
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button'
-import { FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import type { ErrorResponse } from '@/types.ts'
+import { Spinner } from '@/components/ui/spinner'
+import { toast } from 'vue-sonner'
+import { useRouter } from 'vue-router'
 
 const formSchema = toTypedSchema(
   z
@@ -134,18 +141,34 @@ const formSchema = toTypedSchema(
     }),
 )
 
+const router = useRouter()
 const form = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = form.handleSubmit((values, ctx) => {
-  console.log(values, ctx)
-  fetch('/api/auth/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(values),
-  })
+const onSubmit = form.handleSubmit(async (values) => {
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(values),
+    })
+
+    if (!response.ok) {
+      const error = (await response.json()) as ErrorResponse
+      toast.error('При выполнении запроса произошла ошибка')
+      return
+    }
+
+    toast.success('Вы успешно создали аккаунт', {
+      description: 'Введите почту и пароль, чтобы войти в аккаунт',
+    })
+    form.resetForm()
+    router.push({ name: 'login' })
+  } catch {
+    toast.error('При выполнении произошла неизвестная ошибка')
+  }
 })
 </script>

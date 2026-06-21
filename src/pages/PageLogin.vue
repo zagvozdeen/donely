@@ -27,8 +27,8 @@
             </FormItem>
           </FormField>
 
-          <Button class="w-full" type="submit" :disabled="isLoading">
-            <Spinner v-show="isLoading" />
+          <Button class="w-full" type="submit" :disabled="form.isSubmitting.value">
+            <Spinner v-show="form.isSubmitting.value" />
             Войти
           </Button>
 
@@ -55,9 +55,8 @@ import * as z from 'zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { ref } from 'vue'
+import type { ErrorResponse } from '@/types.ts'
 
-const isLoading = ref(false)
 const formSchema = toTypedSchema(
   z.object({
     email: z
@@ -77,24 +76,28 @@ const form = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = form.handleSubmit((values) => {
-  isLoading.value = true
+const onSubmit = form.handleSubmit(async (values) => {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(values),
+    })
 
-  fetch('/api/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(values),
-  })
-    .then((res) => res.json() as Promise<{ token: string }>)
-    .then((data) => {
-      localStorage.setItem('token', data.token)
-      router.push('/')
-      toast.success('Вы успешно вошли в аккаунт')
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+    if (!response.ok) {
+      const error = (await response.json()) as ErrorResponse
+      toast.error('При выполнении запроса произошла ошибка')
+      return
+    }
+
+    const data = (await response.json()) as { token: string }
+    localStorage.setItem('token', data.token)
+    router.push({ name: 'main' })
+    toast.success('Вы успешно вошли в аккаунт')
+  } catch {
+    toast.error('При выполнении произошла неизвестная ошибка')
+  }
 })
 </script>

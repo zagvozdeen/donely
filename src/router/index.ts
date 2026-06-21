@@ -13,21 +13,25 @@ export const createRoutes = () => {
         component: PageMain,
         name: 'main',
         path: '/',
+        meta: { title: 'Главная' },
       },
       {
         component: PageLogin,
         name: 'login',
         path: '/login',
+        meta: { title: 'Вход' },
       },
       {
         component: PageRegister,
         name: 'register',
         path: '/register',
+        meta: { title: 'Регистрация' },
       },
       {
         component: PageLogout,
         name: 'logout',
         path: '/logout',
+        meta: { title: 'Выход из аккаунта' },
       },
     ],
   })
@@ -52,6 +56,12 @@ export const createRoutes = () => {
         return '/login'
       }
     }
+  })
+
+  router.afterEach((to) => {
+    const title = to.meta.title
+
+    document.title = typeof title === 'string' ? `${title} | Donely` : 'Donely'
   })
 
   return router

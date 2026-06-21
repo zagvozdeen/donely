@@ -1,15 +1,13 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v5"
 )
 
-func (a *Application) getMux() http.Handler {
+func (a *Application) getMux() *echo.Echo {
 	mux := echo.New()
 	mux.Logger = a.log.GetSlog()
-	mux.Validator = a
+	mux.Validator = a.createValidator()
 
 	api := mux.Group("/api")
 
@@ -18,10 +16,7 @@ func (a *Application) getMux() http.Handler {
 	guest.POST("/register", a.register)
 
 	auth := api.Group("/", a.authBearer)
-	auth.GET("me", func(c *echo.Context) error {
-		u := c.Get("user")
-		return c.JSON(http.StatusOK, u)
-	})
+	auth.GET("me", a.getMe)
 
 	return mux
 }

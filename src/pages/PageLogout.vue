@@ -15,7 +15,7 @@ const router = useRouter()
 
 onMounted(() => {
   localStorage.removeItem('token')
-  router.push('/login')
+  router.push({ name: 'login' })
   toast.info('Вы вышли из аккаунта')
 })
 </script>

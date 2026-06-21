@@ -4,35 +4,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/zagvozdeen/donely/internal/config"
 	"github.com/zagvozdeen/donely/internal/logger"
 	"github.com/zagvozdeen/donely/internal/store"
 )
 
 type Application struct {
-	cfg       *config.Config
-	log       *logger.Logger
-	store     *store.Store
-	validator *validator.Validate
+	cfg   *config.Config
+	log   *logger.Logger
+	store *store.Store
 }
 
 func NewApplication(cfg *config.Config, log *logger.Logger, store *store.Store) *Application {
 	return &Application{
-		cfg:       cfg,
-		log:       log,
-		store:     store,
-		validator: validator.New(validator.WithRequiredStructEnabled()),
+		cfg:   cfg,
+		log:   log,
+		store: store,
 	}
 }
 
 func (a *Application) Run(ctx context.Context) error {
-	addr := ":" + a.cfg.AppPort
 	server := &http.Server{
-		Addr:        addr,
+		Addr:        net.JoinHostPort("", a.cfg.AppPort),
 		Handler:     a.getMux(),
 		ErrorLog:    a.log.GetLog(),
 		ReadTimeout: 30 * time.Second,
@@ -51,7 +48,7 @@ func (a *Application) Run(ctx context.Context) error {
 		case err := <-errCh:
 			a.log.Error("Failed to listen and serve server", err)
 		case <-time.After(time.Millisecond * 500):
-			a.log.Infof("Server started on %s", addr)
+			a.log.Infof("Server started on %s", net.JoinHostPort("", a.cfg.AppPort))
 		case <-ctx.Done():
 			a.log.Info("Context has been canceled before server started")
 		}
